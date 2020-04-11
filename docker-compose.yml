@@ -1,0 +1,10 @@
+---
+version: '3'
+services:
+  faker-datagen:
+    image: sankara/faker-datagen:latest
+    environment:
+      FAKER_SCHEMA: '{"id":"uuid4","name":"name","address":"address"}'
+      FAKER_FILE: "/data/output.csv"
+    volumes:
+      - /tmp:/data
