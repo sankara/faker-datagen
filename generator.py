@@ -4,42 +4,64 @@ import argparse
 import json
 import csv
 import sys
+import time
 
 #List of support datatypes: https://faker.readthedocs.io/en/stable/providers.html
 #In addition: https://faker.readthedocs.io/en/stable/providers/faker.providers.misc.html
-def generate_row(schema):
-    data = {}
+def generate_data(schema, count=1):
+    data = []
     f = Faker()
-    for k,v in schema.items():
-        data[k] = f.format(v)
+    for i in range(count):
+        data.append({})
+        for k,v in schema.items():
+            data[i][k] = f.format(v)
     return data
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-s", "--schema", help="JSON string representing the schema in a simple <name>:<datatype> format")
-    parser.add_argument("-f", "--output-file", help="A file name to write the data out. (CSV). Uses stdout if not specified")
+    parser.add_argument("-s", "--schema", required=True, help="(env=FAKER_SCHEMA) JSON string representing the schema in a simple <name>:<datatype> format")
+    parser.add_argument("-f", "--output-file", help="(env=FAKER_FILE) A file name to write the data out. (CSV). Uses stdout if not specified")
+    parser.add_argument("-n", "--count", type=int, help="(env=FAKER_COUNT) The number of rows to generate per call")
+    parser.add_argument("-t", "--frequency", type=float, help="(env=FAKER_FREQ) This enables generating continuously at the given frequency (per second)")
 
     return parser.parse_args()
 
 def write_to_csv(data, out):
     w = csv.DictWriter(out, fieldnames = data[0].keys())
-    w.writeheader()
     for r in data:
         w.writerow(r)
+
+def with_open_file_or_stdout(filename, l):
+    if filename:
+        with open(filename, 'a') as out:
+            l(out)
+    else:
+        l(sys.stdout)
 
 def main():
     args = get_args()
     schema_s = os.environ['FAKER_SCHEMA'] if 'FAKER_SCHEMA' in os.environ else args.schema
-    file_name = os.environ['FAKER_FILE'] if 'FAKER_FILE' in os.environ else args.output_file
+    filename = os.environ['FAKER_FILE'] if 'FAKER_FILE' in os.environ else args.output_file
+    freq_per_s = float(os.environ['FAKER_FREQ']) if 'FAKER_FREQ' in os.environ else args.frequency
+    count = int(os.environ['FAKER_COUNT']) if 'FAKER_COUNT' in os.environ else args.count
+    if not count:
+        count = 1
+
+    #if count is given, generate count rows and write to file/out
+    #else loop infinite, generate a row, write to file, sleep
+
 
     schema = json.loads(schema_s)
-    data = [generate_row(schema)]
 
-    if file_name:
-        with open(file_name, 'w') as csv_file:
-            write_to_csv(data, csv_file)
-    else:
-        write_to_csv(data, sys.stdout)
+    with_open_file_or_stdout(filename, lambda out: csv.DictWriter(out, fieldnames = schema.keys()).writeheader())
+
+    while True:
+        data = generate_data(schema, count)
+        with_open_file_or_stdout(filename, lambda out: write_to_csv(data, out))
+        if not freq_per_s:
+            break
+        time.sleep(1/freq_per_s)
+
 
 if __name__ == "__main__":
     main()

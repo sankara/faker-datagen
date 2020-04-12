@@ -6,5 +6,7 @@ services:
     environment:
       FAKER_SCHEMA: '{"id":"uuid4","name":"name","address":"address"}'
       FAKER_FILE: "/data/output.csv"
+      FAKER_FREQ: 1
+      FAKER_COUNT: 1
     volumes:
       - /tmp:/data
