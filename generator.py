@@ -5,6 +5,8 @@ import json
 import csv
 import sys
 import time
+import signal
+from threading import Event
 
 #List of support datatypes: https://faker.readthedocs.io/en/stable/providers.html
 #In addition: https://faker.readthedocs.io/en/stable/providers/faker.providers.misc.html
@@ -41,6 +43,8 @@ def with_open_file_or_stdout(filename, l):
     else:
         l(sys.stdout)
 
+exit = Event()
+
 def main():
     args = get_args()
     schema_s = os.environ['FAKER_SCHEMA'] if 'FAKER_SCHEMA' in os.environ else args.schema
@@ -58,7 +62,7 @@ def main():
 
     with_open_file_or_stdout(filename, lambda out: csv.DictWriter(out, fieldnames = schema.keys()).writeheader())
 
-    while True:
+    while not exit.is_set():
         data = generate_data(schema, count)
         with_open_file_or_stdout(filename, lambda out: write_to_csv(data, out))
         if not freq_per_s:
@@ -67,4 +71,6 @@ def main():
 
 
 if __name__ == "__main__":
+    for sig in [signal.SIGTERM, signal.SIGHUP, signal.SIGINT]:
+        signal.signal(sig, (lambda x,y: exit.set()))
     main()
