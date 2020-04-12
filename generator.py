@@ -14,7 +14,10 @@ def generate_data(schema, count=1):
     for i in range(count):
         data.append({})
         for k,v in schema.items():
-            data[i][k] = f.format(v)
+            val = f.format(v)
+            if isinstance(val, str):
+                val = val.replace('\n', '|').replace('\r', '')
+            data[i][k] = val
     return data
 
 def get_args():
@@ -33,7 +36,7 @@ def write_to_csv(data, out):
 
 def with_open_file_or_stdout(filename, l):
     if filename:
-        with open(filename, 'a') as out:
+        with open(filename, 'a', newline='') as out:
             l(out)
     else:
         l(sys.stdout)
