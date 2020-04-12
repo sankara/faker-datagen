@@ -42,6 +42,7 @@ def with_open_file_or_stdout(filename, l):
             l(out)
     else:
         l(sys.stdout)
+        sys.stdout.flush()
 
 exit = Event()
 
