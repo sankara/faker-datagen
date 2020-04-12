@@ -3,7 +3,7 @@ A jok2k/faker based docker image to generate data based on a given schema
 
 ### From CLI:
 ```
-usage: generator.py [-h] -s SCHEMA [-f OUTPUT_FILE] [-n COUNT] [-t FREQUENCY]
+usage: generator.py [-h] [-s SCHEMA] [-f OUTPUT_FILE] [-n COUNT] [-t FREQUENCY]
 
 optional arguments:
   -h, --help            show this help message and exit
