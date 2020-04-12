@@ -19,7 +19,7 @@ def generate_data(schema, count=1):
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-s", "--schema", required=True, help="(env=FAKER_SCHEMA) JSON string representing the schema in a simple <name>:<datatype> format")
+    parser.add_argument("-s", "--schema", help="(env=FAKER_SCHEMA) JSON string representing the schema in a simple <name>:<datatype> format")
     parser.add_argument("-f", "--output-file", help="(env=FAKER_FILE) A file name to write the data out. (CSV). Uses stdout if not specified")
     parser.add_argument("-n", "--count", type=int, help="(env=FAKER_COUNT) The number of rows to generate per call")
     parser.add_argument("-t", "--frequency", type=float, help="(env=FAKER_FREQ) This enables generating continuously at the given frequency (per second)")
