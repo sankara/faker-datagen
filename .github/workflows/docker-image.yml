@@ -8,11 +8,17 @@ on:
 
 jobs:
 
-  build:
-
+   build-and-push-image:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v2
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag faker-datagen:$(date +%s)
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Build container image
+      uses: docker/build-push-action@v1
+      with:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        registry: docker.pkg.github.com
+        repository: ${{ github.repository }}/faker-datagen-image
+        tag_with_sha: true
+        tag_with_ref: true
